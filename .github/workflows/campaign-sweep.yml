@@ -1,0 +1,23 @@
+name: campaign-sweep
+
+# Daily mine of newly denied flathub submissions for campaign
+# candidates. Research only: it posts a digest of filtered candidates
+# to a standing issue; submissions and outreach stay human.
+on:
+  schedule:
+    - cron: "41 7 * * *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  sweep:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Sweep flathub denials
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 deploy/campaign-sweep.py
