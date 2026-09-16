@@ -148,7 +148,14 @@ for (const { dir, published } of sources) {
 
     entries.push({
       app_id: appId,
-      name: meta.name || null,
+      name:
+        meta.name ||
+        appId
+          .split(".")
+          .at(-1)
+          .replace(/[-_]+/g, " ")
+          .replace(/([a-z])([A-Z])/g, "$1 $2")
+          .replace(/\b\w/g, (c) => c.toUpperCase()),
       icon: await getIcon(appId, meta.source_repo, appDir),
       developer: meta.developer || null,
       description: meta.description || null,

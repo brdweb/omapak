@@ -1,0 +1,70 @@
+# Sonix Studio — packaged from the project's own release tarball.
+#
+# Why a release artifact instead of building from source: the upstream release
+# CI already builds the binary with `--features plugin-host` for x86-64 and
+# publishes it next to its .sha256, so this manifest ships the exact bytes the
+# project's Releases page hands out and there is one build pipeline to keep
+# working (same reasoning as org.libredb.Studio's AppImage repack in this repo).
+# The archive's `sonix` binary is stripped and links only libasound beyond
+# libc/libm/libgcc, all of which the freedesktop runtime provides.
+app-id: io.github.alexwest1981.sonix
+runtime: org.freedesktop.Platform
+runtime-version: '25.08'
+sdk: org.freedesktop.Sdk
+command: sonix
+separate-locales: false
+
+finish-args:
+  # egui/eframe window on Wayland, with an X11 fallback.
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  # Audio engine (cpal/ALSA, which the runtime routes through PulseAudio) and
+  # microphone recording in the Vocal Studio.
+  - --socket=pulseaudio
+  # GPU-accelerated rendering; without it egui falls back to llvmpipe.
+  - --device=dri
+  # The AI assistant talks to a user-configured OpenAI-compatible endpoint
+  # (including one running on the host at 127.0.0.1) and the Suno stem
+  # importer fetches nothing but the files the user picks. Nothing else in the
+  # app makes a network call.
+  - --share=network
+  # The project/sample library root. Inside the sandbox this is the same
+  # ~/Music/Sonix tree the native install writes to.
+  - --filesystem=xdg-music
+  # Plugin host: CLAP/VST3/VST2 plugins are catalogued and dlopen'd from the
+  # user's own plugin directories. Read-only — a plugin's own user data stays
+  # in the sandbox (XDG data/config), so the host copy is never touched.
+  - --filesystem=~/.clap:ro
+  - --filesystem=~/.vst3:ro
+  # Consistent cursor sizing across Wayland and X11.
+  - --env=XCURSOR_PATH=/run/host/user-share/icons:/run/host/share/icons
+
+modules:
+  - name: sonix
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 sonix ${FLATPAK_DEST}/bin/sonix
+      - install -Dm644 io.github.alexwest1981.sonix.desktop ${FLATPAK_DEST}/share/applications/${FLATPAK_ID}.desktop
+      # 512x512: install.sh puts the same asset in hicolor/512x512 on a native
+      # install, so the menu icon matches.
+      - install -Dm644 io.github.alexwest1981.sonix.png ${FLATPAK_DEST}/share/icons/hicolor/512x512/apps/${FLATPAK_ID}.png
+      - install -Dm644 io.github.alexwest1981.sonix.metainfo.xml ${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.metainfo.xml
+    sources:
+      - type: archive
+        only-arches:
+          - x86_64
+        url: https://github.com/alexwest1981/sonix/releases/download/v0.9.0/sonix-0.9.0-x86_64-unknown-linux-gnu.tar.gz
+        sha256: 2c2957390a28c2acb8d80bd73600ff117b3afbc9ab1d35f7994880ab5cb8822e
+        x-checker-data:
+          type: json
+          url: https://api.github.com/repos/alexwest1981/sonix/releases/latest
+          version-query: .tag_name | sub("^v"; "")
+          timestamp-query: .published_at
+          url-query: .assets[] | select(.name | endswith("-x86_64-unknown-linux-gnu.tar.gz")) | .browser_download_url
+      - type: file
+        path: io.github.alexwest1981.sonix.desktop
+      - type: file
+        path: io.github.alexwest1981.sonix.png
+      - type: file
+        path: io.github.alexwest1981.sonix.metainfo.xml

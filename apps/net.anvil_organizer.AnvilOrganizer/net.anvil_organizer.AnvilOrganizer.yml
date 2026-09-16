@@ -78,5 +78,9 @@ modules:
         url: https://github.com/Marc1326/Anvil-Organizer.git
         tag: v1.2.2
         commit: 3dd4eb87249a99b93573ea4c4aaab0248c471d3a
+        x-checker-data:
+          type: git
+          tag-pattern: ^v\d+(\.\d+)+$
+          is-main-source: true
       - type: file
         path: net.anvil_organizer.AnvilOrganizer.metainfo.xml
