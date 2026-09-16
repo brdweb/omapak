@@ -1,0 +1,10 @@
+submitter: jon
+source_repo: https://github.com/NickHirras/macrotrainer-releases
+summary: Macro Trainer, privacy-first macro tracking (Flutter desktop, repacked release bundle)
+description: >-
+  Submission dir arrived without metadata.yml, so the site catalog
+  silently skipped it while the app itself built and published fine
+  (2026-09-16). Reconstructed from the manifest and metainfo.
+license: LicenseRef-proprietary
+source_access: proprietary
+tags: [utility, health]

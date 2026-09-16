@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.alexwest1981.OmaAmp</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>OmaAmp</name>
+  <summary>Winamp-style audio player with themes, equalizer and visualizers</summary>
+  <developer id="io.github.alexwest1981">
+    <name>Alex Weström</name>
+  </developer>
+  <description>
+    <p>
+      OmaAmp is a Winamp 2.91-style audio player for Linux, written in Python with
+      Qt. It plays local files with a real DSP chain behind it — a 10-band IIR
+      biquad equalizer, a preamp with a soft limiter, and an FFT spectrum analyzer
+      driven by the audio actually playing rather than by a decoration.
+    </p>
+    <p>What it does:</p>
+    <ul>
+      <li>The classic modular layout: main window with LED clock, spectrum analyzer, marquee, specs readout, volume, balance and seek</li>
+      <li>10-band graphic equalizer (60 Hz to 16 kHz) with presets, preamp and a live frequency-response curve</li>
+      <li>Six visualizer modes — spectrum analyzer, laser oscilloscope, dual VU meters, warp starfield, matrix rain and a polar frequency ring</li>
+      <li>Playlist editor with drag and drop, search, M3U/PLS import and export, and state restored on restart</li>
+      <li>Theme engine with bundled themes, an in-app theme studio, and .wsz skin support</li>
+      <li>Internet radio from a searchable directory and direct stream URLs, plus YouTube audio streams</li>
+      <li>MP3, FLAC, WAV, OGG and AAC playback</li>
+      <li>English and Swedish interface</li>
+    </ul>
+    <p>
+      Playing local files needs no network at all. Radio, YouTube streams and the
+      optional theme-sharing feature do, and they are the only things that use it: the
+      radio directory (radio-browser.info), whatever stream URL you paste, and — only if
+      you paste a GitHub token of your own — the GitHub API, to publish a shared theme as
+      a gist in your account. There is no telemetry, no account of the app's own, and no
+      background update check.
+    </p>
+  </description>
+  <launchable type="desktop-id">io.github.alexwest1981.OmaAmp.desktop</launchable>
+  <url type="homepage">https://github.com/alexwest1981/OmaAmp</url>
+  <url type="bugtracker">https://github.com/alexwest1981/OmaAmp/issues</url>
+  <url type="vcs-browser">https://github.com/alexwest1981/OmaAmp</url>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/alexwest1981/OmaAmp/12aa4c8df3c7bb10f0730c0cf84f193f577362b8/screenshots/preview1.png</image>
+      <caption>The Classic Retro theme, with the spectrum analyzer</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/alexwest1981/OmaAmp/12aa4c8df3c7bb10f0730c0cf84f193f577362b8/screenshots/preview2.png</image>
+      <caption>The Cyberpunk Neon theme, with the laser oscilloscope</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/alexwest1981/OmaAmp/12aa4c8df3c7bb10f0730c0cf84f193f577362b8/screenshots/preview3.png</image>
+      <caption>Amber Phosphor, with the analog VU meters</caption>
+    </screenshot>
+  </screenshots>
+  <categories>
+    <category>AudioVideo</category>
+    <category>Audio</category>
+    <category>Player</category>
+  </categories>
+  <keywords>
+    <keyword>audio</keyword>
+    <keyword>music</keyword>
+    <keyword>player</keyword>
+    <keyword>equalizer</keyword>
+    <keyword>visualizer</keyword>
+  </keywords>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="1.0.0" date="2026-09-04">
+      <description>
+        <p>First packaged release, from the project's current tree.</p>
+        <ul>
+          <li>Winamp 2.91-style player with LED clock, marquee and specs readout</li>
+          <li>10-band IIR biquad equalizer with presets and a live response curve</li>
+          <li>Six visualizer modes and a resizable Visualizer Studio</li>
+          <li>Playlist editor with drag and drop, search and M3U/PLS support</li>
+          <li>Theme engine, theme studio and .wsz skin support</li>
+          <li>Internet radio, YouTube audio streams and direct stream URLs</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+</component>

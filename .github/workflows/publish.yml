@@ -3,7 +3,13 @@ name: publish
 on:
   push:
     branches: [main]
-    paths: ["apps/**", "omapak.flatpakrepo", "deploy/push-to-r2.py", "deploy/install-runtimes.sh"]
+    paths:
+      - "apps/**"
+      - "omapak.flatpakrepo"
+      - "deploy/push-to-r2.py"
+      - "deploy/pull-from-r2.py"
+      - "deploy/install-runtimes.sh"
+      - ".github/workflows/publish.yml"
   workflow_dispatch:
 
 permissions:
@@ -53,8 +59,43 @@ jobs:
       - name: Install flatpak tooling
         run: |
           sudo apt-get update
-          sudo apt-get install -y flatpak flatpak-builder ostree \
-            pkg-config libcairo2-dev libgirepository1.0-dev libglib2.0-dev
+          # Runtime deps of flatpak-builder 1.4.11 below: it shells out to
+          # bsdunzip (.zip sources), appstreamcli compose (export) and
+          # eu-strip (debuginfo) — none ship on the runner since the
+          # 2026-09 image drift.
+          sudo apt-get install -y flatpak ostree \
+            libarchive-tools appstream-compose appstream elfutils
+
+      # Same builder as the judge, copied verbatim. apt's 1.4.2 cannot
+      # expand bare-string source includes ("modules: [ foo.json ]"),
+      # which 1.4.11 accepts — OmaAmp passed the judge and then failed
+      # here with "sdk not specified" (2026-09-16). One builder version
+      # everywhere ends that drift class.
+      - name: Cache flatpak-builder 1.4.11
+        id: fbcache
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/bin/flatpak-builder
+          key: flatpak-builder-1.4.11-v1
+      - name: Build flatpak-builder 1.4.11
+        if: steps.fbcache.outputs.cache-hit != 'true'
+        run: |
+          sudo apt-get install -y meson ninja-build build-essential \
+            libflatpak-dev libcurl4-openssl-dev libyaml-dev libjson-glib-dev libelf-dev
+          curl -sL -o /tmp/fb.tar.xz \
+            https://github.com/flatpak/flatpak-builder/releases/download/1.4.11/flatpak-builder-1.4.11.tar.xz
+          echo "2a5ef4f3eaea86f808aa477e57e65b6f68978eb1c034fafe05bffdebbf1dcd03  /tmp/fb.tar.xz" | sha256sum -c
+          tar -C /tmp -xf /tmp/fb.tar.xz
+          cd /tmp/flatpak-builder-1.4.11
+          sed -i \
+            -e "s|find_program('appstreamcli', version: '>= 0.15.0')|find_program('appstreamcli', version: '>= 0.15.0', required: false)|" \
+            -e "s|run_command(appstreamcli, \['compose', '--help'\], check: true)|run_command('false', check: false)|" \
+            meson.build
+          meson setup build --buildtype=release -D docs=disabled -D tests=false
+          ninja -C build
+          sudo install -m755 build/src/flatpak-builder /usr/local/bin/flatpak-builder
+      - name: flatpak-builder version check
+        run: flatpak-builder --version
 
       - name: Install runtimes
         run: ./deploy/install-runtimes.sh
@@ -81,7 +122,20 @@ jobs:
           failed=""
           for app in apps/*/; do
             name=$(basename "$app")
-            manifest=$(find "$app" -maxdepth 1 \( -name '*.yml' -o -name '*.yaml' -o -name '*.json' \) ! -name 'metadata.yml' ! -name 'flathub.json' | head -1)
+            # Pick the app-id-named manifest like the judge does
+            # (omapak-core find_manifest): a plain find grabs whichever
+            # .json lands first, which fed flatpak-builder a
+            # python3-requirements.json fragment as OmaAmp's manifest
+            # ("Failed to init: sdk not specified", 2026-09-16).
+            manifest=""
+            for cand in "$name.yml" "$name.yaml" "$name.json"; do
+              [ -f "$app/$cand" ] && manifest="$app/$cand" && break
+            done
+            if [ -z "$manifest" ]; then
+              manifest=$(find "$app" -maxdepth 1 \( -name '*.yml' -o -name '*.yaml' -o -name '*.json' \) \
+                ! -name 'metadata.yml' ! -name 'flathub.json' \
+                ! -name '*-sources.json' ! -name '*-dependencies.json' | head -1)
+            fi
             [ -n "$manifest" ] || continue
             echo "::group::build $name"
             if flatpak-builder --force-clean --disable-rofiles-fuse --user \

@@ -1,0 +1,92 @@
+# OmarchyTube — built from source. The project publishes no release artifact,
+# so this packages the git tree the way flathub's own Electron-from-source
+# recipe does (flatpak-builder-tools node/vanilla-quick-start): npm's
+# dependencies come from generated-sources.json, which also carries the
+# Electron 44.3.0 zip the lockfile pins, so the build never touches the
+# network.
+app-id: io.github.alexwest1981.OmarchyTube
+runtime: org.freedesktop.Platform
+runtime-version: '25.08'
+sdk: org.freedesktop.Sdk
+base: org.electronjs.Electron2.BaseApp
+base-version: '25.08'
+command: omarchy-tube
+separate-locales: false
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.node24
+
+finish-args:
+  # Electron on Wayland with an X11 fallback. main.js pins the Wayland ozone
+  # platform, which is what this app is built for (Hyprland/Omarchy).
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  # Video playback and accelerated decode (main.js enables VA-API).
+  - --socket=pulseaudio
+  - --device=dri
+  # YouTube itself, YouTube's OAuth device flow, the SponsorBlock API and the
+  # Return YouTube Dislike API. Those are the only endpoints the app talks to;
+  # there is no telemetry.
+  - --share=network
+  # Chromium's download manager writes the user's downloads here.
+  - --filesystem=xdg-download
+  - --env=XCURSOR_PATH=/run/host/user-share/icons:/run/host/share/icons
+
+modules:
+  - name: omarchy-tube
+    buildsystem: simple
+    build-options:
+      # Everything under node_modules/electron/dist is a prebuilt upstream
+      # artifact (Chromium plus Electron's own libraries). There is no debug
+      # information in it to extract, and stripping an already-stripped
+      # Chromium binary is at best pointless — the same reasoning
+      # org.libredb.Studio writes down for its AppImage payload. It also makes
+      # the build independent of eu-strip being on the builder.
+      strip: false
+      no-debuginfo: true
+      append-path: /usr/lib/sdk/node24/bin
+      env:
+        # Where @electron/get and the generated sources agree to keep the
+        # Electron zip: /run/build/<module>/flatpak-node/cache/electron
+        XDG_CACHE_HOME: /run/build/omarchy-tube/flatpak-node/cache
+        npm_config_cache: /run/build/omarchy-tube/flatpak-node/npm-cache
+    build-commands:
+      # Offline: every tarball in generated-sources.json is already unpacked
+      # into the npm cache above.
+      - npm install --prefix=omarchy-tube --offline
+      # Electron 44 ships no postinstall hook — the npm package no longer
+      # fetches its binary, it downloads lazily on first run
+      # (node_modules/electron/index.js -> install.js). That cannot work in a
+      # flatpak, where /app is read-only by the time the app starts. Run
+      # Electron's own installer here instead, so the binary is unpacked from
+      # the vendored cache at build time and the shipped tree is complete.
+      - node omarchy-tube/node_modules/electron/install.js
+      # Keep the tree where the package manager left it, Electron's own
+      # node_modules included, so the wrapper can start it in place.
+      - cp -r omarchy-tube ${FLATPAK_DEST}/omarchy-tube
+      - install -Dm755 omarchy-tube.sh ${FLATPAK_DEST}/bin/omarchy-tube
+      - install -Dm644 io.github.alexwest1981.OmarchyTube.desktop ${FLATPAK_DEST}/share/applications/${FLATPAK_ID}.desktop
+      # The repo ships the icon as a 256x256 PNG and a 512x512 SVG. Only PNGs
+      # are installed: appstreamcli compose (noble's 1.0.2) fails to read the
+      # SVG and that failure aborts the build, so the 512 entry is the same
+      # artwork rendered to PNG from the repository's own SVG with rsvg-convert.
+      - install -Dm644 io.github.alexwest1981.OmarchyTube.png ${FLATPAK_DEST}/share/icons/hicolor/256x256/apps/${FLATPAK_ID}.png
+      - install -Dm644 io.github.alexwest1981.OmarchyTube.512.png ${FLATPAK_DEST}/share/icons/hicolor/512x512/apps/${FLATPAK_ID}.png
+      - install -Dm644 io.github.alexwest1981.OmarchyTube.metainfo.xml ${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.metainfo.xml
+    sources:
+      - type: git
+        url: https://github.com/alexwest1981/OmarchyTube
+        commit: 0674b9a4f76b559ebc8f6e7afde173c7fd2e9d40
+        dest: omarchy-tube
+      # npm dependencies + the Electron zip, hashes included.
+      - generated-sources.json
+      - type: file
+        path: omarchy-tube.sh
+      - type: file
+        path: io.github.alexwest1981.OmarchyTube.desktop
+      - type: file
+        path: io.github.alexwest1981.OmarchyTube.png
+      - type: file
+        path: io.github.alexwest1981.OmarchyTube.512.png
+      - type: file
+        path: io.github.alexwest1981.OmarchyTube.metainfo.xml
