@@ -1,6 +1,6 @@
 id: nl.flyingpie.wtq
 runtime: org.freedesktop.Platform
-runtime-version: "48"
+runtime-version: "25.08"
 sdk: org.freedesktop.Sdk
 sdk-extensions:
  - org.freedesktop.Sdk.Extension.dotnet9
