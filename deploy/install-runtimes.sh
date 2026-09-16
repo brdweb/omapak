@@ -14,7 +14,12 @@ failed=""
 install_retry() {
   echo "Installing $*"
   for attempt in 1 2 3; do
-    if flatpak install --user -y --noninteractive flathub "$@" >/tmp/rt-install.log 2>&1; then
+    # No --noninteractive: it means "implicit no", and noble's flatpak
+    # 1.14 uses exactly that to refuse end-of-life runtimes (GNOME 48,
+    # KDE 5.15-*) that flathub still hosts — the single wall behind a
+    # third of the failed submissions. -y answers the EOL prompt
+    # instead; stdin from /dev/null keeps a TTY-less runner moving.
+    if flatpak install --user -y flathub "$@" </dev/null >/tmp/rt-install.log 2>&1; then
       grep -m3 . /tmp/rt-install.log | tail -3
       return 0
     fi
