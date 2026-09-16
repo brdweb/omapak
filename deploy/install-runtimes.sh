@@ -86,15 +86,15 @@ fi
 
 for m in $paths; do
   [ -f "$m" ] || continue
-  rt=$(strip "$(grep -m1 -E '^"?runtime"?[[:space:]]*:' "$m" | cut -d: -f2-)")
-  rv=$(strip "$(grep -m1 -E '^"?runtime-version"?[[:space:]]*:' "$m" | cut -d: -f2-)")
+  rt=$(strip "$(grep -m1 -E '^[[:space:]]*"?runtime"?[[:space:]]*:' "$m" | cut -d: -f2-)")
+  rv=$(strip "$(grep -m1 -E '^[[:space:]]*"?runtime-version"?[[:space:]]*:' "$m" | cut -d: -f2-)")
   if [ -n "$rt" ] && [ -n "$rv" ]; then
     sdk=$(echo "$rt" | sed 's/Platform/Sdk/')
     install_retry "$rt//$rv" "$sdk//$rv"
     # A manifest may pin its own SDK with a branch (extension-style
     # `sdk: org.kde.Sdk//5.15-25.08`); install it verbatim — the derived
     # Platform→Sdk ref above does not cover that shape.
-    psdk=$(grep -m1 -E '^"?sdk"?:' "$m" | cut -d: -f2- | tr -d '"' | tr -d "'" | sed 's/[[:space:]#].*//')
+    psdk=$(grep -m1 -E '^[[:space:]]*"?sdk"?:' "$m" | cut -d: -f2- | tr -d '"' | tr -d "'" | sed 's/[[:space:]#].*//')
     case "$psdk" in *//*) install_retry "$psdk" ;; esac
     # Extensions are versioned alongside the SDK; flatpak-builder fails
     # outright ("Requested extension ... not installed") without them.
@@ -102,8 +102,8 @@ for m in $paths; do
       install_ext "$ext" "$rv"
     done
   fi
-  bt=$(strip "$(grep -m1 -E '^"?base"?[[:space:]]*:' "$m" | cut -d: -f2-)")
-  bv=$(strip "$(grep -m1 -E '^"?base-version"?[[:space:]]*:' "$m" | cut -d: -f2-)")
+  bt=$(strip "$(grep -m1 -E '^[[:space:]]*"?base"?[[:space:]]*:' "$m" | cut -d: -f2-)")
+  bv=$(strip "$(grep -m1 -E '^[[:space:]]*"?base-version"?[[:space:]]*:' "$m" | cut -d: -f2-)")
   if [ -n "$bt" ] && [ -n "$bv" ]; then
     install_retry "$bt//$bv"
   fi
