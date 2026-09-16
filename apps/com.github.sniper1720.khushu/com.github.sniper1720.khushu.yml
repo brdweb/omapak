@@ -45,7 +45,14 @@ modules:
     sources:
       - type: archive
         url: https://github.com/sniper1720/khushu/archive/refs/tags/v1.0.0.tar.gz
-        sha256: fda29dc23ce9c52c3d02b8e15d8ce580add16294f6ea5ba746688ff697017dc8
+        sha256: 82376b43f36b7da11be9afa476a127f060f036d773f98f71b1ee5712162dffc4
+        # The v1.0.0 tag tarball was re-cut upstream; sha is the live asset
+        x-checker-data:
+          type: json
+          url: https://api.github.com/repos/sniper1720/khushu/releases/latest
+          version-query: .tag_name
+          url-query: '"https://github.com/sniper1720/khushu/archive/refs/tags/" + $version + ".tar.gz"'
+          is-main-source: true
       - cargo-sources.json
     build-options:
       append-path: /usr/lib/sdk/rust-stable/bin
