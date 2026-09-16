@@ -38,4 +38,4 @@ modules:
   - type: git
     url: https://github.com/qarmin/czkawka.git
     tag: 10.0.0_flatpak
-    commit: a2f611ecd891f1e7bc775f689409d6d1fe813e72
+    commit: 93b0733075e5ab073b012e3cea26e60d195019b9
