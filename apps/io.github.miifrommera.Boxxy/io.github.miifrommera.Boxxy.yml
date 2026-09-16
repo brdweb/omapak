@@ -1,6 +1,6 @@
 app-id: io.github.miifrommera.Boxxy
 runtime: org.freedesktop.Platform
-runtime-version: "50"
+runtime-version: "25.08"
 sdk: org.freedesktop.Sdk
 sdk-extensions:
     - org.freedesktop.Sdk.Extension.rust-stable
