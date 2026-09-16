@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=OmaAmp
+GenericName=Audio Player
+Comment=Classic Winamp-style audio player with themes, 10-band EQ and visualizers
+Exec=omaamp %F
+Icon=io.github.alexwest1981.OmaAmp
+Terminal=false
+Categories=AudioVideo;Audio;Player;Qt;
+MimeType=audio/mpeg;audio/x-mpegurl;audio/ogg;audio/x-wav;audio/flac;audio/mp4;audio/aac;
+Keywords=audio;music;player;winamp;equalizer;
+StartupNotify=true
+StartupWMClass=OmaAmp

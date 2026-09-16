@@ -1,0 +1,13 @@
+submitter: alexwest1981
+source_repo: https://github.com/alexwest1981/NovaCut
+summary: A CapCut-style video editor for Linux with a multi-track timeline, effects and a plugin marketplace
+license: MIT
+tags: [video, utility]
+description: >-
+  NovaCut is an Electron video editor for Linux: a multi-track magnetic timeline,
+  a real-time preview canvas with 16:9 / 9:16 / 1:1 / 4:5 presets, text and
+  effect layers, speed ramping, 50 transitions, 50 effects with cinema LUTs, and
+  a plugin marketplace with an in-app filter creator. Probing, preview and export
+  shell out to the ffmpeg and ffprobe that org.freedesktop.Platform 25.08 already
+  ships, so nothing is bundled for them. Built from source at 2aedbb8; npm
+  dependencies and the Electron 44.3.0 zip come from generated-sources.json.
