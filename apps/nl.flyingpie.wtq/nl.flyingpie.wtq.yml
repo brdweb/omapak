@@ -1,7 +1,7 @@
 id: nl.flyingpie.wtq
-runtime: org.gnome.Platform
+runtime: org.freedesktop.Platform
 runtime-version: "48"
-sdk: org.gnome.Sdk
+sdk: org.freedesktop.Sdk
 sdk-extensions:
  - org.freedesktop.Sdk.Extension.dotnet9
 build-options:
