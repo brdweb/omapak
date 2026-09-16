@@ -4,7 +4,7 @@
     "runtime-version": "25.08",
     "sdk": "org.freedesktop.Sdk",
     "sdk-extensions": [
-        "org.freedesktop.Sdk.Extension.rust-nightly"
+        "org.freedesktop.Sdk.Extension.rust-stable"
     ],
     "command": "pytouhou",
     "finish-args": [
@@ -99,7 +99,7 @@
             "name": "pytouhou",
             "buildsystem": "simple",
             "build-options": {
-                "append-path": "/usr/lib/sdk/rust-nightly/bin",
+                "append-path": "/usr/lib/sdk/rust-stable/bin",
                 "env": {
                     "CARGO_HOME": "/run/build/pytouhou/cargo"
                 }
