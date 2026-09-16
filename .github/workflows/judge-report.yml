@@ -23,19 +23,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # PR app data as DATA only, never executed. The judge binary is built
-      # from main (trusted).
-      - name: Check out PR app data (data only)
-        uses: actions/checkout@v4
-        with:
-          ref: ${{ github.event.workflow_run.head_sha }}
-          sparse-checkout: apps
-          path: pr-apps
-
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
 
+      # judge-partial carries the PR's apps/ alongside out/ and sources/
+      # (uploaded by the unprivileged static-build job). PR app data
+      # arrives as DATA only, never executed — the judge binary is built
+      # from this main checkout. Do NOT check out the fork's head here:
+      # actions/checkout refuses it from workflow_run contexts
+      # (pwn-request guard), and overriding that guard would put fork
+      # code in a secrets-bearing workflow.
+      # Stale pending-approval runs that complete without ever executing
+      # upload no artifact; downstream steps already tolerate an empty
+      # tree, so don't let the download kill the job.
       - uses: actions/download-artifact@v4
+        continue-on-error: true
         with:
           name: judge-partial
           run-id: ${{ github.event.workflow_run.id }}
@@ -55,7 +57,7 @@ jobs:
             # The judge exits nonzero when the recommendation isn't
             # "accept" — that's a report to deliver, not a CI failure.
             # Files under final/ are written before the exit.
-            cargo run -q -p omapak-judge -- "pr-apps/apps/$name" --partial "$partial" $source_dir --out "final/$name" \
+            cargo run -q -p omapak-judge -- "apps/$name" --partial "$partial" $source_dir --out "final/$name" \
               || echo "::warning::$name: judge recommended against accepting"
           done
 
@@ -81,13 +83,28 @@ jobs:
               print(f"pushed {key}")
           EOF
 
+      # No in-repo report commits: main's branch protection requires pull
+      # requests, and the site reads its reports live from R2 anyway
+      # (repo.omapak.org/reports/<id>.json) — fresher than any commit
+      # could be.
+
       - name: Post report comment
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
             const run = context.payload.workflow_run;
-            const prNumber = run.pull_requests[0]?.number;
+            let prNumber = run.pull_requests[0]?.number;
+            if (!prNumber) {
+              // Runs triggered by a maintainer's update-branch push carry
+              // an empty pull_requests array in this payload — find the
+              // PR by head sha instead of silently dropping the report.
+              const prs = await github.rest.pulls.list({
+                owner: context.repo.owner, repo: context.repo.repo,
+                state: 'open', per_page: 100,
+              });
+              prNumber = prs.data.find(p => p.head.sha === run.head_sha)?.number;
+            }
             if (!prNumber) { core.warning('no PR associated with this run'); return; }
             if (!fs.existsSync('final')) { core.info('no reports to post'); return; }
             const existing = await github.rest.issues.listComments({
@@ -108,4 +125,104 @@ jobs:
                   issue_number: prNumber, body: md,
                 });
               }
+            }
+
+      # Duplicate submissions (same upstream project per the submitter's
+      # declared source_repo) close themselves: the report explains it,
+      # and a maintainer reopens on a good-faith dispute.
+      - name: Close duplicate submissions
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const run = context.payload.workflow_run;
+            if (run.event !== 'pull_request') return;
+            let prNumber = run.pull_requests[0]?.number;
+            if (!prNumber) {
+              const prs = await github.rest.pulls.list({
+                owner: context.repo.owner, repo: context.repo.repo,
+                state: 'open', per_page: 100,
+              });
+              prNumber = prs.data.find(p => p.head.sha === run.head_sha)?.number;
+            }
+            if (!prNumber || !fs.existsSync('final')) return;
+            for (const dir of fs.readdirSync('final')) {
+              let report;
+              try { report = JSON.parse(fs.readFileSync(`final/${dir}/report.json`, 'utf8')); }
+              catch { continue; }
+              const dup = report.static?.duplicate_of;
+              if (!dup) continue;
+              await github.rest.issues.createComment({
+                owner: context.repo.owner, repo: context.repo.repo, issue_number: prNumber,
+                body: `Closing: this duplicates \`${dup}\`, which omapak already packages (same upstream project per its declared \`source_repo\`). Updates and fixes belong in \`apps/${dup}\` and go through the same judge. If this is genuinely a different application, comment here and a maintainer will reopen.`,
+              });
+              await github.rest.pulls.update({
+                owner: context.repo.owner, repo: context.repo.repo,
+                pull_number: prNumber, state: 'closed',
+              });
+              core.notice(`closed duplicate submission (of ${dup})`);
+            }
+
+      # Auto-merge the update sweep's PRs: an already-accepted app whose
+      # update still builds, carries no critical security flag, and whose
+      # diff only moves pinned-source lines needs no human. Anything else
+      # — new permissions, files outside the app dir, a failed build —
+      # stays open for review.
+      - name: Auto-merge clean update-bot PRs
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const run = context.payload.workflow_run;
+            if (run.event !== 'pull_request') return;
+            let prNumber = run.pull_requests[0]?.number;
+            if (!prNumber) {
+              const prs = await github.rest.pulls.list({
+                owner: context.repo.owner, repo: context.repo.repo,
+                state: 'open', per_page: 100,
+              });
+              prNumber = prs.data.find(p => p.head.sha === run.head_sha)?.number;
+            }
+            if (!prNumber) return;
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner, repo: context.repo.repo, pull_number: prNumber,
+            });
+            if (pr.user.login !== 'github-actions[bot]') return;
+            if (!pr.title.startsWith('Update ')) return;
+
+            const { data: files } = await github.rest.pulls.listFiles({
+              owner: context.repo.owner, repo: context.repo.repo, pull_number: prNumber,
+            });
+            const dirs = new Set(files.map(f => f.filename.split('/').slice(0, 2).join('/')));
+            if (dirs.size !== 1 || ![...dirs][0].match(/^apps\/[^/]+$/)) return;
+
+            const { data: diff } = await github.rest.pulls.get({
+              owner: context.repo.owner, repo: context.repo.repo, pull_number: prNumber,
+              mediaType: { format: 'diff' },
+            });
+            const changed = diff.split('\n')
+              .filter(l => (l.startsWith('+') || l.startsWith('-')) && !l.startsWith('+++') && !l.startsWith('---'));
+            const safeLine = l => /^\s*(url|sha256|tag|commit|dest-filename|version):\s|^\s*#|^\s*<release /.test(l.slice(1));
+            if (!changed.every(safeLine)) {
+              core.notice('update PR touches more than pinned sources — leaving for review');
+              return;
+            }
+
+            const name = [...dirs][0].split('/')[1];
+            let report;
+            try { report = JSON.parse(require('fs').readFileSync(`final/${name}/report.json`, 'utf8')); }
+            catch { core.notice('no report for ' + name); return; }
+            // Report JSON is snake_case; verdict values are lowercase.
+            if (report.verdict !== 'published') return;
+            const critical = (report.rubric?.security_flags || [])
+              .some(f => f.severity === 'critical');
+            if (critical) return;
+
+            try {
+              await github.rest.pulls.merge({
+                owner: context.repo.owner, repo: context.repo.repo,
+                pull_number: prNumber, merge_method: 'merge',
+              });
+              core.notice(`auto-merged: ${pr.title}`);
+            } catch (e) {
+              core.warning(`auto-merge declined (${e.message}) — leaving for review`);
             }

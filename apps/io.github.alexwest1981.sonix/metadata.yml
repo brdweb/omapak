@@ -1,0 +1,19 @@
+submitter: alexwest1981
+source_repo: https://github.com/alexwest1981/sonix
+summary: Sonix Studio, a native Linux digital audio workstation
+description: >-
+  Alex's own DAW, submitted by its author. Sonix Studio is a Rust/egui
+  digital audio workstation for Linux: direct timeline audio editing with
+  magnetic loop snapping, a 16-step channel rack, piano roll, an integrated
+  synthesizer, a multichannel effects mixer, Vocal Studio recording, stem
+  separation and a CLAP/VST3/VST2 plugin host. Audio runs through cpal/ALSA
+  (PipeWire through its ALSA layer). The manifest repacks the project's own
+  release tarball — the x86-64 build with plugin-host, stripped, linking only
+  libasound beyond libc — so the flatpak ships the same bytes the Releases
+  page hands out. Optional features that are not in that binary (neural stem
+  separation behind a build feature and a user-supplied model, and LV2
+  loading, which has no host yet) are stated in the README and in the
+  metainfo rather than quietly implied.
+license: MIT OR Apache-2.0
+homepage: https://github.com/alexwest1981/sonix
+tags: [audio, music, daw]

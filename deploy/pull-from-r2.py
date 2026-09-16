@@ -14,7 +14,9 @@ by the worker and never need to exist on a CI runner.
 Usage: pull-from-r2.py [repo-dir]
 """
 import os
+import random
 import sys
+import time
 from concurrent.futures import ThreadPoolExecutor
 
 import boto3
@@ -49,13 +51,19 @@ print(f"listing: {len(keys)} files to restore ({skipped_big} big objects skipped
 
 def fetch(pair):
     key, _ = pair
-    try:
-        local = os.path.join(REPO, key)
-        os.makedirs(os.path.dirname(local), exist_ok=True)
-        s3.download_file(BUCKET, key, local)
-        return None
-    except Exception as e:
-        return (key, e)
+    local = os.path.join(REPO, key)
+    os.makedirs(os.path.dirname(local), exist_ok=True)
+    # R2 throttles (429) in bursts at 16-way concurrency — botocore's
+    # adaptive retries alone exhausted mid-restore and killed publish
+    # with 2 files of 36k missing (2026-09-16). Back off per file.
+    for attempt in range(6):
+        try:
+            s3.download_file(BUCKET, key, local)
+            return None
+        except Exception as e:
+            if attempt == 5:
+                return (key, e)
+            time.sleep(min(2**attempt, 15) + random.random())
 
 
 failed = 0

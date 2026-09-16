@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=NovaCut
+GenericName=Video Editor
+Comment=CapCut-style video editor with a multi-track timeline and a plugin marketplace
+Exec=novacut %U
+Icon=io.github.alexwest1981.NovaCut
+Terminal=false
+Categories=AudioVideo;Video;AudioVideoEditing;
+Keywords=video;editor;timeline;cut;effects;LUT;ffmpeg;
+StartupNotify=true
+StartupWMClass=NovaCut

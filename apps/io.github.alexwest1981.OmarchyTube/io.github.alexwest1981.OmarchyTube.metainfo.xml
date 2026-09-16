@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.alexwest1981.OmarchyTube</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>OmarchyTube</name>
+  <summary>Full-screen YouTube client with ad blocking and SponsorBlock</summary>
+  <developer id="io.github.alexwest1981">
+    <name>Alex Weström</name>
+  </developer>
+  <description>
+    <p>
+      OmarchyTube is a standalone YouTube window for Omarchy and Hyprland — the
+      ReVanced/SmartTube idea without a browser around it. It opens full-screen and
+      stays out of the way, so the video gets the whole display instead of a tab.
+    </p>
+    <p>What it does:</p>
+    <ul>
+      <li>TV (leanback) mode for arrow-key and remote navigation, and a desktop mode you toggle with F2</li>
+      <li>Sign-in through Google's OAuth device flow: a QR code is shown and the session is stored locally — no password is typed into the app</li>
+      <li>Ad blocking at the request level, plus cosmetic filtering of sponsored shelves and banners, and skipping of pre-roll and mid-roll ads</li>
+      <li>SponsorBlock segment skipping, with the segments marked on the progress bar and an on-screen "unskip" button</li>
+      <li>Return YouTube Dislike counts on the player</li>
+      <li>Hardware-accelerated video decode (VA-API)</li>
+    </ul>
+    <p>
+      The app talks to three services and no others: YouTube, the SponsorBlock API and
+      the Return YouTube Dislike API. It sends no telemetry and has no analytics. It is an
+      independent client and is not affiliated with, endorsed by, or built by YouTube.
+    </p>
+  </description>
+  <launchable type="desktop-id">io.github.alexwest1981.OmarchyTube.desktop</launchable>
+  <url type="homepage">https://github.com/alexwest1981/OmarchyTube</url>
+  <url type="bugtracker">https://github.com/alexwest1981/OmarchyTube/issues</url>
+  <url type="vcs-browser">https://github.com/alexwest1981/OmarchyTube</url>
+  <categories>
+    <category>AudioVideo</category>
+    <category>Video</category>
+    <category>Player</category>
+  </categories>
+  <keywords>
+    <keyword>YouTube</keyword>
+    <keyword>video</keyword>
+    <keyword>SponsorBlock</keyword>
+    <keyword>streaming</keyword>
+  </keywords>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="1.0.0" date="2026-09-16">
+      <description>
+        <p>First packaged release.</p>
+        <ul>
+          <li>Full-screen TV and desktop view modes</li>
+          <li>Network-level and cosmetic ad blocking, plus ad skipping</li>
+          <li>SponsorBlock integration with progress-bar markers and unskip</li>
+          <li>Return YouTube Dislike counts</li>
+          <li>OAuth device-flow sign-in by QR code</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+</component>
