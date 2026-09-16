@@ -1,7 +1,7 @@
 app-id: io.github.traciges.asus-hub
-runtime: org.gnome.Platform
-runtime-version: "50"
-sdk: org.gnome.Sdk
+runtime: org.freedesktop.Platform
+runtime-version: "25.08"
+sdk: org.freedesktop.Sdk
 sdk-extensions:
   - org.freedesktop.Sdk.Extension.rust-stable
 command: asus-hub
