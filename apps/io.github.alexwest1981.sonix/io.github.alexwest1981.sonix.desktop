@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Sonix Studio
+GenericName=Digital Audio Workstation
+Comment=Native Linux DAW (Rust/egui)
+Exec=sonix
+Icon=io.github.alexwest1981.sonix
+Terminal=false
+Categories=Audio;AudioVideo;Music;
+Keywords=DAW;Audio;Music;Mixer;Recording;
+StartupNotify=true
+StartupWMClass=sonix-daw
