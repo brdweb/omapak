@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=OmarchyTube
+GenericName=YouTube Client
+Comment=A dedicated YouTube client for Omarchy and Hyprland, with ad blocking and SponsorBlock
+Exec=omarchy-tube
+Icon=io.github.alexwest1981.OmarchyTube
+Terminal=false
+Categories=AudioVideo;Video;Player;
+Keywords=YouTube;Video;Player;SponsorBlock;
+StartupNotify=true
+StartupWMClass=OmarchyTube
