@@ -72,6 +72,17 @@ community consensus, in the open) and your app moves to `omapak-unmaintained`:
 still installable, clearly labeled. Stay quiet and it drops. Dead software in a
 store is a lie to users.
 
+## Maintainers
+
+[alexwest1981](https://github.com/alexwest1981) (Alex Weström) is our
+first volunteer maintainer. He earned it the good way: while his own
+four submissions sat red on a CI outage that was entirely our fault, he
+mirrored our runner in a container, proved the apps were fine, and filed
+[#139](https://github.com/outcrop-labs/omapak/issues/139) — including a
+dead-linter catch we'd missed ourselves. He reviews submissions and CI
+now. If he beats you to diagnosing your own red build, you're in good
+company.
+
 ## Repo ops
 
 Signing key lives on my machine (`FAD5B6F0BD9E93E7`). CI (`.github/workflows/`)

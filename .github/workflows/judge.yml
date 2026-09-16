@@ -1,14 +1,23 @@
 name: judge
 
 on:
+  # Negated patterns, not paths-ignore: paths + paths-ignore together make
+  # the filter MORE permissive (a publish.yml-only push triggered the judge
+  # on 2026-09-16), the opposite of the intent.
   pull_request:
-    paths: ["apps/**"]
+    paths:
+      - "apps/**"
+      - "!apps/**/report.json"
+      - "!apps/**/report.md"
   push:
     branches: [main]
-    paths: ["apps/**"]
+    paths:
+      - "apps/**"
+      - "!apps/**/report.json"
+      - "!apps/**/report.md"
 
 permissions:
-  contents: write
+  contents: read
 
 jobs:
   # Phase 1: static checks + real build. Runs on PRs and main with NO
@@ -27,11 +36,57 @@ jobs:
           sudo apt-get update
           # libcairo/girepository headers: PyGObject (a flatpak-builder-lint
           # dependency) compiles from source on noble.
-          sudo apt-get install -y flatpak flatpak-builder pipx \
+          # libarchive-tools: flatpak-builder 1.4.11 extracts .zip sources
+          # by shelling out to bsdunzip. appstream-compose: its export
+          # phase runs `appstreamcli compose`, a separate addon package
+          # on noble. elfutils: the strip phase shells out to eu-strip
+          # (the 2026-09 runner image drift dropped all three).
+          sudo apt-get install -y flatpak pipx libarchive-tools appstream-compose appstream elfutils \
             pkg-config libcairo2-dev libgirepository1.0-dev libglib2.0-dev
           # Not on PyPI under this name; install from the flathub git repo.
           pipx install git+https://github.com/flathub/flatpak-builder-lint.git
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+      # Fail in seconds if the compose addon is missing, not 15 minutes
+      # into a build at export. (`sudo appstreamcli install
+      # org.freedesktop.appstream.compose` — the error's own hint — needs
+      # PackageKit, which the runners don't run; the apt package above
+      # ships the same /usr/libexec/appstreamcli-compose binary.)
+      - name: Verify AppStream Compose
+        run: |
+          test -x /usr/libexec/appstreamcli-compose
+          appstreamcli compose --help >/dev/null
+
+      # noble's flatpak-builder 1.4.2 can't expand bare-string source
+      # includes and garbles version-pinned sdk-extensions — both standard
+      # in current manifests. Build the current release instead; its only
+      # build-time hazard is an appstreamcli probe that noble's appstreamcli
+      # 1.0.2 fails, patched out below (compose features unused by us).
+      - name: Cache flatpak-builder 1.4.11
+        id: fbcache
+        uses: actions/cache@v4
+        with:
+          path: /usr/local/bin/flatpak-builder
+          key: flatpak-builder-1.4.11-v1
+      - name: Build flatpak-builder 1.4.11
+        if: steps.fbcache.outputs.cache-hit != 'true'
+        run: |
+          sudo apt-get install -y meson ninja-build build-essential \
+            libflatpak-dev libcurl4-openssl-dev libyaml-dev libjson-glib-dev libelf-dev
+          curl -sL -o /tmp/fb.tar.xz \
+            https://github.com/flatpak/flatpak-builder/releases/download/1.4.11/flatpak-builder-1.4.11.tar.xz
+          echo "2a5ef4f3eaea86f808aa477e57e65b6f68978eb1c034fafe05bffdebbf1dcd03  /tmp/fb.tar.xz" | sha256sum -c
+          tar -C /tmp -xf /tmp/fb.tar.xz
+          cd /tmp/flatpak-builder-1.4.11
+          sed -i \
+            -e "s|find_program('appstreamcli', version: '>= 0.15.0')|find_program('appstreamcli', version: '>= 0.15.0', required: false)|" \
+            -e "s|run_command(appstreamcli, \['compose', '--help'\], check: true)|run_command('false', check: false)|" \
+            meson.build
+          meson setup build --buildtype=release -D docs=disabled -D tests=false
+          ninja -C build
+          sudo install -m755 build/src/flatpak-builder /usr/local/bin/flatpak-builder
+      - name: flatpak-builder version check
+        run: flatpak-builder --version
 
       - name: Changed app dirs
         if: github.event_name == 'pull_request'
@@ -91,6 +146,13 @@ jobs:
       # exactly when the partial report (with the reason) must reach
       # judge-report.yml. The default success() condition was silently
       # discarding it.
+      #
+      # apps/ rides along so judge-report.yml never has to check out the
+      # fork's head itself: actions/checkout refuses fork heads from
+      # workflow_run contexts (pwn-request guard), which killed every
+      # report for external PRs. This job runs unprivileged on the PR
+      # merge ref, so the app data reaches the privileged phase as an
+      # artifact — data only, same as out/ and sources/.
       - uses: actions/upload-artifact@v4
         if: "!cancelled()"
         with:
@@ -98,43 +160,11 @@ jobs:
           path: |
             out/
             sources/
+            apps/
           retention-days: 3
           if-no-files-found: warn
 
-  # Main-branch pushes have secrets: full agent run, commit reports back
-  # into apps/ so every accepted app carries its public report in-repo.
-  report:
-    if: "!cancelled() && github.event_name == 'push' && github.ref == 'refs/heads/main'"
-    needs: [static-build]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: Swatinem/rust-cache@v2
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: judge-partial
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Full judge run for every app
-        env:
-          OMAPAK_LLM_BASE_URL: ${{ secrets.OMAPAK_LLM_BASE_URL }}
-          OMAPAK_LLM_KEY: ${{ secrets.OMAPAK_LLM_KEY }}
-          OMAPAK_LLM_MODEL: ${{ secrets.OMAPAK_LLM_MODEL }}
-        run: |
-          for app in apps/*/; do
-            name=$(basename "$app")
-            [ -f "out/$name/report.json" ] || { echo "::warning::$name has no partial report"; continue; }
-            cargo run -q -p omapak-judge -- "$app" --partial "out/$name/report.json" --out "final/$name"
-            cp "final/$name/report.json" "$app/report.json"
-            cp "final/$name/report.md" "$app/report.md"
-          done
-
-      - name: Upload final reports
-        uses: actions/upload-artifact@v4
-        with:
-          name: judge-final
-          path: final/
-          retention-days: 90
-          if-no-files-found: error
+  # The push-path full run (reports committed into apps/, R2 push) lives in
+  # judge-report.yml, which fires on this workflow's completion for PR and
+  # push runs alike. A push-only job here made every PR check list show
+  # "report — skipping", which read as the judge not running.

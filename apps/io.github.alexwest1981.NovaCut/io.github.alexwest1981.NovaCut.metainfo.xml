@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.alexwest1981.NovaCut</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>NovaCut</name>
+  <summary>CapCut-style video editor with a multi-track timeline and plugin marketplace</summary>
+  <developer id="io.github.alexwest1981">
+    <name>Alex Weström</name>
+  </developer>
+  <description>
+    <p>
+      NovaCut is a video editor for Linux desktops: the fast, touch-friendly
+      workflow of a mobile editor, with a real multi-track timeline underneath.
+      It runs natively on Wayland and keeps the preview live while you cut.
+    </p>
+    <p>What it does:</p>
+    <ul>
+      <li>Magnetic timeline with separate lanes for main video, overlays, text, adjustment layers and audio</li>
+      <li>Trim handles, razor cut (S or Ctrl+B), snapping (N) and timeline zoom</li>
+      <li>Live preview canvas with 16:9, 9:16, 1:1 and 4:5 project presets</li>
+      <li>Text and typography layers with fonts, colours, outlines and shadows</li>
+      <li>Speed ramping, audio waveforms, and a canvas-based smart cutout that needs no model or network access</li>
+      <li>50 transitions and 50 effects, including cinema LUTs</li>
+      <li>A plugin marketplace with declarative manifest.json filters, four presets included (Cyberpunk Neon, 80s Retro VHS, Cinematic Golden Hour, Film Noir) and an in-app filter creator</li>
+      <li>Hardware-accelerated decode for preview (VA-API)</li>
+    </ul>
+    <p>
+      Probing, preview and export use the ffmpeg and ffprobe that ship with the
+      freedesktop runtime, and the export dialog offers what that build
+      supports. Speech-to-text captions are not available in this package: they
+      need a whisper.cpp build and a Whisper model, and neither is in the
+      project repository yet.
+    </p>
+    <p>
+      Projects, downloaded plugins and fonts are kept in the application's own
+      data directory. The app reaches the network only for marketplace plugins
+      and stock media the user asks for, and it sends no telemetry.
+    </p>
+  </description>
+  <launchable type="desktop-id">io.github.alexwest1981.NovaCut.desktop</launchable>
+  <url type="homepage">https://github.com/alexwest1981/NovaCut</url>
+  <url type="bugtracker">https://github.com/alexwest1981/NovaCut/issues</url>
+  <url type="vcs-browser">https://github.com/alexwest1981/NovaCut</url>
+  <categories>
+    <category>AudioVideo</category>
+    <category>Video</category>
+    <category>AudioVideoEditing</category>
+  </categories>
+  <keywords>
+    <keyword>video</keyword>
+    <keyword>editor</keyword>
+    <keyword>timeline</keyword>
+    <keyword>effects</keyword>
+    <keyword>LUT</keyword>
+    <keyword>cut</keyword>
+  </keywords>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="0.1.0" date="2026-09-16">
+      <description>
+        <p>First packaged release.</p>
+        <ul>
+          <li>Multi-track magnetic timeline with trim, razor cut and snapping</li>
+          <li>Live preview canvas with four aspect presets</li>
+          <li>50 transitions, 50 effects and cinema LUTs</li>
+          <li>Plugin marketplace and an in-app filter creator</li>
+          <li>Wayland-native window with VA-API accelerated decode</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+</component>

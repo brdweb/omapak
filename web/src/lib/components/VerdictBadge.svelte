@@ -22,10 +22,15 @@
       ✓ certified</span
     >
   {/if}
-  <span
-    class="inline-flex items-center rounded-sm border px-2 py-0.5 font-mono text-xs
-      {style[verdict] ?? style.unpublished}"
-  >
-    {verdict === "unpublished" ? "unpublished" : VERDICT_LABEL[verdict]}
-  </span>
+  <!-- A published app wearing a verdict chip on every tile is constant
+       noise — everything listed is accepted by definition. Only surface
+       a chip when there's something to say. -->
+  {#if verdict !== "published"}
+    <span
+      class="inline-flex items-center rounded-sm border px-2 py-0.5 font-mono text-xs
+        {style[verdict] ?? style.unpublished}"
+    >
+      {verdict === "unpublished" ? "unpublished" : VERDICT_LABEL[verdict]}
+    </span>
+  {/if}
 </span>

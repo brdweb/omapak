@@ -1,5 +1,7 @@
 #!/bin/bash
-flatpak remote-add --if-not-exists --user flathub https://dl.flathub.org/repo/flathub.flatpakrepo 2>/dev/null || true
+# User installs: the judge job runs inside the flathub-infra container
+# (see judge.yml), where a native flatpak-builder sees them fine.
+flatpak --user remote-add --if-not-exists flathub https://dl.flathub.org/repo/flathub.flatpakrepo 2>/dev/null || true
 
 strip() {
   echo "$1" | sed 's/[^a-zA-Z0-9._-]//g'
@@ -44,7 +46,7 @@ sdk_exts() {
 # so the listing is fetched once per run and cached.
 ext_branches() {
   [ -s /tmp/ext-refs.txt ] || \
-    flatpak --user remote-ls flathub --runtime --columns=ref > /tmp/ext-refs.txt 2>/dev/null || true
+    flatpak remote-ls flathub --runtime --columns=ref > /tmp/ext-refs.txt 2>/dev/null || true
   grep "^runtime/$1/x86_64/" /tmp/ext-refs.txt | cut -d/ -f4
 }
 
@@ -79,19 +81,24 @@ fi
 
 for m in $paths; do
   [ -f "$m" ] || continue
-  rt=$(strip "$(grep -m1 '^runtime:' "$m" | cut -d: -f2-)")
-  rv=$(strip "$(grep -m1 '^runtime-version:' "$m" | cut -d: -f2-)")
+  rt=$(strip "$(grep -m1 -E '^"?runtime"?[[:space:]]*:' "$m" | cut -d: -f2-)")
+  rv=$(strip "$(grep -m1 -E '^"?runtime-version"?[[:space:]]*:' "$m" | cut -d: -f2-)")
   if [ -n "$rt" ] && [ -n "$rv" ]; then
     sdk=$(echo "$rt" | sed 's/Platform/Sdk/')
     install_retry "$rt//$rv" "$sdk//$rv"
+    # A manifest may pin its own SDK with a branch (extension-style
+    # `sdk: org.kde.Sdk//5.15-25.08`); install it verbatim — the derived
+    # Platform→Sdk ref above does not cover that shape.
+    psdk=$(grep -m1 -E '^"?sdk"?:' "$m" | cut -d: -f2- | tr -d '"' | tr -d "'" | sed 's/[[:space:]#].*//')
+    case "$psdk" in *//*) install_retry "$psdk" ;; esac
     # Extensions are versioned alongside the SDK; flatpak-builder fails
     # outright ("Requested extension ... not installed") without them.
     for ext in $(sdk_exts "$m"); do
       install_ext "$ext" "$rv"
     done
   fi
-  bt=$(strip "$(grep -m1 '^base:' "$m" | cut -d: -f2-)")
-  bv=$(strip "$(grep -m1 '^base-version:' "$m" | cut -d: -f2-)")
+  bt=$(strip "$(grep -m1 -E '^"?base"?[[:space:]]*:' "$m" | cut -d: -f2-)")
+  bv=$(strip "$(grep -m1 -E '^"?base-version"?[[:space:]]*:' "$m" | cut -d: -f2-)")
   if [ -n "$bt" ] && [ -n "$bv" ]; then
     install_retry "$bt//$bv"
   fi

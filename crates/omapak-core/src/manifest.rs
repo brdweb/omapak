@@ -118,10 +118,10 @@ pub fn parse_manifest(text: &str) -> anyhow::Result<ManifestInfo> {
 
 /// Find the manifest file in an app dir: the JSON/YAML named after the app id
 /// (flathub convention — the app dir itself is named after the app id), else
-/// any single *.json/*.yml/*.yaml at the top level. Never falls back to
-/// metadata.yml or vendored sources files (cargo-sources.json,
-/// python3-dependencies.json, …) — those aren't manifests, and handing them
-/// to flatpak-builder produces baffling "sdk not specified" failures.
+/// any single *.json/*.yml/*.yaml at the top level. metadata.yml and vendored
+/// sources files (cargo-sources.json, python3-dependencies.json, …) are
+/// excluded outright, not just deprioritized — they aren't manifests, and the
+/// extension tie-break could still hand them to flatpak-builder.
 pub fn find_manifest(dir: &Path) -> Option<std::path::PathBuf> {
     let dir_name = dir.file_name().and_then(|n| n.to_str()).unwrap_or("");
     let entries = std::fs::read_dir(dir).ok()?;
@@ -129,24 +129,30 @@ pub fn find_manifest(dir: &Path) -> Option<std::path::PathBuf> {
         .flatten()
         .map(|e| e.path())
         .filter(|p| {
-            p.is_file()
-                && p.extension().map(|e| e == "json" || e == "yml" || e == "yaml").unwrap_or(false)
+            if !p.is_file() {
+                return false;
+            }
+            if !p
+                .extension()
+                .map(|e| e == "json" || e == "yml" || e == "yaml")
+                .unwrap_or(false)
+            {
+                return false;
+            }
+            let name = p.file_name().and_then(|n| n.to_str()).unwrap_or("");
+            let stem = name
+                .trim_end_matches(".json")
+                .trim_end_matches(".yml")
+                .trim_end_matches(".yaml");
+            stem != "metadata"
+                && !name.ends_with("-sources.json")
+                && !name.ends_with("-dependencies.json")
         })
         .collect();
     candidates.sort_by_key(|p| {
         let name = p.file_name().and_then(|n| n.to_str()).unwrap_or("");
         let stem = name.trim_end_matches(".json").trim_end_matches(".yml").trim_end_matches(".yaml");
-        let is_metadata = stem == "metadata";
-        let is_sources_file = name.ends_with("-sources.json") || name.ends_with("-dependencies.json");
-        let tier = if stem == dir_name && !stem.is_empty() {
-            0
-        } else if is_metadata {
-            3
-        } else if is_sources_file {
-            2
-        } else {
-            1
-        };
+        let tier = if stem == dir_name && !stem.is_empty() { 0 } else { 1 };
         (tier, !name.ends_with(".json"))
     });
     candidates.into_iter().next()

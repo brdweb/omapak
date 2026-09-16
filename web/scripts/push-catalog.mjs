@@ -78,10 +78,19 @@ for (const name of readdirSync(join(root, "apps"))) {
   }
 
   const appId = report?.app_id ?? name;
+  // Icons live at the repo URL — publish's icon-extract step pushes one
+  // for every successfully built app; metainfo <icon> tags are usually
+  // stock names or absent and never point at anything fetchable.
+  const fallbackName = appId
+    .split(".")
+    .at(-1)
+    .replace(/[-_]+/g, " ")
+    .replace(/([a-z])([A-Z])/g, "$1 $2");
+  const friendly = (meta.name || fallbackName).replace(/\b\w/g, (c) => c.toUpperCase());
   entries.push({
     app_id: appId,
-    name: meta.name || null,
-    icon: meta.icon || null,
+    name: friendly,
+    icon: `https://repo.omapak.org/icons/${appId}.png`,
     developer: meta.developer || null,
     description: meta.description || null,
     urls: meta.urls || {},
