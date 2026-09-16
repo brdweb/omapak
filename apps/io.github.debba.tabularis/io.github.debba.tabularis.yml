@@ -33,5 +33,11 @@ modules:
         url: https://github.com/debba/tabularis/releases/download/v0.9.2/tabularis_0.9.2_amd64.AppImage
         sha256: 4306ceb7a6baae5938f0efeb58ba535aa5c6e192c3061d2f7adebcd5d9bfc924
         dest-filename: tabularis.AppImage
+        x-checker-data:
+          type: json
+          url: https://api.github.com/repos/debba/tabularis/releases/latest
+          version-query: .tag_name | sub("^v"; "")
+          url-query: '"https://github.com/debba/tabularis/releases/download/v" + $version + "/tabularis_" + $version + "_amd64.AppImage"'
+          is-main-source: true
       - type: file
         path: io.github.debba.tabularis.metainfo.xml

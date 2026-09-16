@@ -1,0 +1,101 @@
+# NovaCut — built from source at a pinned commit. The project publishes no
+# release artifact, so this follows flathub's Electron-from-source recipe
+# (flatpak-builder-tools node/vanilla-quick-start): npm's dependencies come from
+# generated-sources.json, which also carries the Electron 44.3.0 zip the
+# lockfile pins, so the build never touches the network.
+#
+# ffmpeg and ffprobe — which src/main.js spawns for probing, preview and export
+# — are already part of org.freedesktop.Platform//25.08 (/usr/bin/ffmpeg), so
+# nothing is bundled for them. The app asks `ffmpeg -encoders` at runtime and
+# offers what that build actually has.
+app-id: io.github.alexwest1981.NovaCut
+runtime: org.freedesktop.Platform
+runtime-version: '25.08'
+sdk: org.freedesktop.Sdk
+base: org.electronjs.Electron2.BaseApp
+base-version: '25.08'
+command: novacut
+separate-locales: false
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.node24
+
+finish-args:
+  # Electron on Wayland, with an X11 fallback.
+  - --share=ipc
+  - --socket=wayland
+  - --socket=fallback-x11
+  # Preview audio and waveform peaks.
+  - --socket=pulseaudio
+  # VA-API decode and GL for the preview canvas.
+  - --device=dri
+  # The plugin marketplace and the stock-media downloads it offers.
+  - --share=network
+  # src/main.js searches these directories when it has to locate a clip
+  # (~/Videos, ~/Music, ~/Pictures, ~/Desktop, ~/Downloads and
+  # ~/Downloads/OmaDrop/Received). Files chosen in the open/save dialogs arrive
+  # through the document portal, so no broader access is requested. Projects,
+  # downloaded plugins and fonts live under app.getPath('userData').
+  - --filesystem=xdg-videos
+  - --filesystem=xdg-music
+  - --filesystem=xdg-pictures
+  - --filesystem=xdg-desktop
+  - --filesystem=xdg-download
+  - --env=XCURSOR_PATH=/run/host/user-share/icons:/run/host/share/icons
+
+modules:
+  - name: novacut
+    buildsystem: simple
+    build-options:
+      # node_modules/electron/dist is a prebuilt upstream artifact (Chromium
+      # plus Electron's own libraries). There is no debug information in it to
+      # extract, and stripping an already-stripped Chromium binary is at best
+      # pointless — the reasoning org.libredb.Studio writes down for its
+      # AppImage payload.
+      strip: false
+      no-debuginfo: true
+      append-path: /usr/lib/sdk/node24/bin
+      env:
+        # Where @electron/get and the generated sources agree to keep the
+        # Electron zip: /run/build/novacut/flatpak-node/cache/electron
+        XDG_CACHE_HOME: /run/build/novacut/flatpak-node/cache
+        npm_config_cache: /run/build/novacut/flatpak-node/npm-cache
+    build-commands:
+      # Offline: every tarball in generated-sources.json is already unpacked
+      # into the npm cache above.
+      - npm install --prefix=novacut --offline
+      # Electron 44 ships no postinstall hook — the npm package no longer
+      # fetches its binary, it downloads lazily on first run
+      # (node_modules/electron/index.js -> install.js). That cannot work in a
+      # flatpak, where /app is read-only by the time the app starts. Run
+      # Electron's own installer here instead, so the binary is unpacked from
+      # the vendored cache at build time and the shipped tree is complete.
+      - node novacut/node_modules/electron/install.js
+      # bin/whisper-cli is linked against libwhisper.so.1 and libggml*.so.0 that
+      # exist only in the author's local build tree; they are not in the
+      # repository, so the binary cannot load inside the sandbox. Leaving it out
+      # makes the captions feature report "whisper-cli binär saknas i bin/"
+      # instead of dying on a missing shared object. Shipping transcription
+      # means packaging whisper.cpp plus the ~75 MB ggml model — a follow-up.
+      - rm -f novacut/bin/whisper-cli
+      - cp -r novacut ${FLATPAK_DEST}/novacut
+      - install -Dm755 novacut.sh ${FLATPAK_DEST}/bin/novacut
+      - install -Dm644 io.github.alexwest1981.NovaCut.desktop ${FLATPAK_DEST}/share/applications/${FLATPAK_ID}.desktop
+      # The repository carries no icon, so the submission ships one (a 512x512
+      # PNG rendered from the artwork in this directory).
+      - install -Dm644 io.github.alexwest1981.NovaCut.png ${FLATPAK_DEST}/share/icons/hicolor/512x512/apps/${FLATPAK_ID}.png
+      - install -Dm644 io.github.alexwest1981.NovaCut.metainfo.xml ${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.metainfo.xml
+    sources:
+      - type: git
+        url: https://github.com/alexwest1981/NovaCut
+        commit: 2aedbb8dcdf66603b2d98527579521387a0bb574
+        dest: novacut
+      # npm dependencies + the Electron zip, hashes included.
+      - generated-sources.json
+      - type: file
+        path: novacut.sh
+      - type: file
+        path: io.github.alexwest1981.NovaCut.desktop
+      - type: file
+        path: io.github.alexwest1981.NovaCut.png
+      - type: file
+        path: io.github.alexwest1981.NovaCut.metainfo.xml
