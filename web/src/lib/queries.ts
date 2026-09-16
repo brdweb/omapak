@@ -1,8 +1,11 @@
 import { createQuery } from "@tanstack/svelte-query";
 import type { Catalog, FlathubIndex, Report } from "./report";
 
+// "no-cache" always revalidates with the origin: the worker once served
+// these files with a one-year immutable header, and any browser holding
+// that cached copy would never see another catalog or report again.
 async function fetchJson<T>(url: string): Promise<T> {
-  const res = await fetch(url);
+  const res = await fetch(url, { cache: "no-cache" });
   if (!res.ok) throw new Error(`${url}: ${res.status}`);
   return res.json() as Promise<T>;
 }
