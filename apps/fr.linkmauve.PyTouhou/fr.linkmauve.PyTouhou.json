@@ -118,7 +118,7 @@
                 {
                     "type": "file",
                     "url": "https://linkmauve.fr/files/pytouhou.hg",
-                    "sha256": "e61eface99b3dac4d70feadf59d59ca7aa28a950e0aa2e0ad264e3158c1211e0"
+                    "sha256": "0fdc44a4bc87ab7282a5f4785bda06b72b9c456ead4fe6dd33c83068a95c55b2"
                 },
                 "pytouhou-rust.json"
             ]
