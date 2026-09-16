@@ -1,0 +1,13 @@
+[Desktop Entry]
+Type=Application
+Name=OmaScribe
+GenericName=Rich Text Editor
+Comment=Word-like rich text editor with AI review, vault and document export
+Exec=omascribe %F
+Icon=io.github.alexwest1981.OmaScribe
+Terminal=false
+Categories=Office;WordProcessor;TextEditor;Utility;
+MimeType=application/vnd.openxmlformats-officedocument.wordprocessingml.document;text/markdown;text/plain;text/html;
+Keywords=editor;document;markdown;docx;writing;
+StartupNotify=true
+StartupWMClass=OmaScribe

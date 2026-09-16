@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.alexwest1981.OmaScribe</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>OmaScribe</name>
+  <summary>Rich text editor with AI review, vault and document export</summary>
+  <developer id="io.github.alexwest1981">
+    <name>Alex Weström</name>
+  </developer>
+  <description>
+    <p>
+      OmaScribe is a word processor for Linux that writes like a document editor and
+      reads like a writing tool: rich text with styles, tables, images and charts, a
+      vault of templates, and an AI review that works on the text you have selected
+      rather than on the whole document.
+    </p>
+    <p>What it does:</p>
+    <ul>
+      <li>Rich text editing with styles, tables, charts, images and print layout</li>
+      <li>DOCX, PDF, Markdown, plain text and HTML import and export</li>
+      <li>AI review and inline suggestions through any OpenAI-compatible endpoint the user configures</li>
+      <li>A vault of templates and reusable documents, plus a research panel</li>
+      <li>Document statistics, a code analyser and a ghostwriter mode</li>
+      <li>Google Fonts browser with download into the document</li>
+      <li>Swedish and English interface</li>
+      <li>Dictation, when the optional faster-whisper dependency is available</li>
+    </ul>
+    <p>
+      The AI features only ever talk to the endpoint you configure yourself — there is
+      no built-in service, no account, and no telemetry. Local models work too: point it
+      at a llama.cpp, vLLM or Ollama-compatible URL on your own machine.
+    </p>
+  </description>
+  <launchable type="desktop-id">io.github.alexwest1981.OmaScribe.desktop</launchable>
+  <url type="homepage">https://github.com/alexwest1981/OmaScribe</url>
+  <url type="bugtracker">https://github.com/alexwest1981/OmaScribe/issues</url>
+  <url type="vcs-browser">https://github.com/alexwest1981/OmaScribe</url>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/alexwest1981/OmaScribe/b0360330c5873c11c4fa42e97f0d3a8e8fc19800/screenshot.png</image>
+      <caption>The editor with the AI review panel and the document sidebar</caption>
+    </screenshot>
+  </screenshots>
+  <categories>
+    <category>Office</category>
+    <category>WordProcessor</category>
+    <category>TextEditor</category>
+    <category>Utility</category>
+  </categories>
+  <keywords>
+    <keyword>editor</keyword>
+    <keyword>document</keyword>
+    <keyword>markdown</keyword>
+    <keyword>docx</keyword>
+    <keyword>writing</keyword>
+  </keywords>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="0.1.0" date="2026-09-15">
+      <description>
+        <p>First packaged release, from the project's current development tree.</p>
+        <ul>
+          <li>Rich text editor with templates, vault and document statistics</li>
+          <li>DOCX, PDF, Markdown, text and HTML export</li>
+          <li>AI review, research panel and ghostwriter over a user-configured endpoint</li>
+          <li>Google Fonts browser</li>
+          <li>Swedish and English interface</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+</component>

@@ -157,11 +157,18 @@ fn main() -> Result<()> {
         omapak_core::is_certified(r, omapak_core::appstream_clean(&static_report))
     });
 
+    // Submission dirs are named by app id, so even a manifest that never
+    // parsed yields a usable id for the report header (was "unknown").
     let app_id = static_report
         .manifest
         .as_ref()
         .map(|m| m.app_id.clone())
-        .unwrap_or_else(|| "unknown".into());
+        .unwrap_or_else(|| {
+            app_dir
+                .file_name()
+                .map(|n| n.to_string_lossy().into_owned())
+                .unwrap_or_else(|| "unknown".into())
+        });
 
     let report = Report {
         schema_version: REPORT_SCHEMA_VERSION,
