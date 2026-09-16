@@ -47,6 +47,6 @@ modules:
     sources:
       - type: archive
         url: https://github.com/Traciges/Asus-Hub/archive/refs/tags/v1.0.5.tar.gz
-        sha256: 314e9dc83caaf8658cb8e7d49cbf6ea9a65a92f3c819fd6bff7622ac1bb3a7db
+        sha256: c533a0acfb2abb4a7d1758aef21544c1735894deb0b6b6e6b9844cd24bd4047c
         strip-components: 1
       - cargo-sources.json
