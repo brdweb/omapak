@@ -1,0 +1,19 @@
+submitter: alexwest1981
+source_repo: https://github.com/alexwest1981/OmarchyTube
+summary: OmarchyTube, a full-screen YouTube client for Omarchy and Hyprland
+description: >-
+  Alex's own app, submitted by its author. OmarchyTube is an Electron client
+  that puts YouTube in a single full-screen window built for Omarchy and
+  Hyprland: a TV/leanback mode for arrow-key navigation, a desktop mode on F2,
+  sign-in through Google's OAuth device flow (a QR code, no password typed
+  into the app), network-level and cosmetic ad blocking, SponsorBlock
+  skipping and Return YouTube Dislike counts. The project publishes no release
+  artifact, so the manifest builds the git tree the way flathub's own
+  Electron-from-source recipe does: npm dependencies and the Electron 44.3.0
+  zip the lockfile pins are both vendored through generated-sources.json, and
+  the build runs with no network access. The app contacts YouTube, the
+  SponsorBlock API and the Return YouTube Dislike API, and nothing else — no
+  telemetry, no analytics.
+license: MIT
+homepage: https://github.com/alexwest1981/OmarchyTube
+tags: [video, youtube, media]

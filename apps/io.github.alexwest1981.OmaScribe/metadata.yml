@@ -1,0 +1,21 @@
+submitter: alexwest1981
+source_repo: https://github.com/alexwest1981/OmaScribe
+summary: OmaScribe, a rich text editor with AI review and a document vault
+description: >-
+  Alex's own app, submitted by its author. OmaScribe is a PyQt6 word processor:
+  rich text with styles, tables, images and charts, DOCX/PDF/Markdown export, a
+  vault of templates, a research panel and an AI review that works on the
+  selection rather than the whole document. The AI features call an
+  OpenAI-compatible endpoint the user configures — no built-in service, no
+  account, no telemetry. The project publishes no release artifact and no PyPI
+  package, so the manifest builds the git tree and installs its Python
+  dependencies from python3-requirements.json, generated with
+  flatpak-pip-generator against the same runtime the sandbox runs. Dictation is
+  the one advertised feature that is not bundled: it needs the optional
+  faster-whisper dependency, which is not in the project's declared
+  dependencies, so without it the dictation button produces placeholder text.
+  That is stated in the metainfo and tracked as follow-up work rather than
+  quietly shipped.
+license: MIT
+homepage: https://github.com/alexwest1981/OmaScribe
+tags: [office, editor, writing]
