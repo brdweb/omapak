@@ -81,8 +81,8 @@ fi
 
 for m in $paths; do
   [ -f "$m" ] || continue
-  rt=$(strip "$(grep -m1 '^runtime:' "$m" | cut -d: -f2-)")
-  rv=$(strip "$(grep -m1 '^runtime-version:' "$m" | cut -d: -f2-)")
+  rt=$(strip "$(grep -m1 -E '^"?runtime"?[[:space:]]*:' "$m" | cut -d: -f2-)")
+  rv=$(strip "$(grep -m1 -E '^"?runtime-version"?[[:space:]]*:' "$m" | cut -d: -f2-)")
   if [ -n "$rt" ] && [ -n "$rv" ]; then
     sdk=$(echo "$rt" | sed 's/Platform/Sdk/')
     install_retry "$rt//$rv" "$sdk//$rv"
@@ -97,8 +97,8 @@ for m in $paths; do
       install_ext "$ext" "$rv"
     done
   fi
-  bt=$(strip "$(grep -m1 '^base:' "$m" | cut -d: -f2-)")
-  bv=$(strip "$(grep -m1 '^base-version:' "$m" | cut -d: -f2-)")
+  bt=$(strip "$(grep -m1 -E '^"?base"?[[:space:]]*:' "$m" | cut -d: -f2-)")
+  bv=$(strip "$(grep -m1 -E '^"?base-version"?[[:space:]]*:' "$m" | cut -d: -f2-)")
   if [ -n "$bt" ] && [ -n "$bv" ]; then
     install_retry "$bt//$bv"
   fi

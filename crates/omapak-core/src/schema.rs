@@ -206,6 +206,10 @@ pub struct StaticReport {
     pub advisories: Vec<StaticAdvisory>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub source_stats: Option<SourceStats>,
+    /// Another already-accepted app that packages the same upstream
+    /// project (matched on the submitter's declared source_repo).
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub duplicate_of: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -308,8 +312,14 @@ mod tests {
 
     #[test]
     fn verdict_gates() {
-        assert_eq!(compute_verdict(&rubric_with(5, 5, vec![]), true), Verdict::Published);
-        assert_eq!(compute_verdict(&rubric_with(5, 5, vec![]), false), Verdict::BuildFailed);
+        assert_eq!(
+            compute_verdict(&rubric_with(5, 5, vec![]), true),
+            Verdict::Published
+        );
+        assert_eq!(
+            compute_verdict(&rubric_with(5, 5, vec![]), false),
+            Verdict::BuildFailed
+        );
         // Even critical security flags don't block publication; they are
         // prominent tags. Certification is withheld, not the app.
         let critical = SecurityFlag {
@@ -326,8 +336,8 @@ mod tests {
     fn certification_badge() {
         assert!(is_certified(&rubric_with(4, 4, vec![]), true));
         assert!(!is_certified(&rubric_with(4, 4, vec![]), false)); // bad appstream
-        assert!(!is_certified(&rubric_with(2, 4, vec![]), true));  // low scores
-        assert!(!is_certified(&rubric_with(4, 2, vec![]), true));  // bad packaging
+        assert!(!is_certified(&rubric_with(2, 4, vec![]), true)); // low scores
+        assert!(!is_certified(&rubric_with(4, 2, vec![]), true)); // bad packaging
         let critical = SecurityFlag {
             severity: Severity::Critical,
             detail: "x".into(),
