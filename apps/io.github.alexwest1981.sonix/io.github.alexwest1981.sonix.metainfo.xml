@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.alexwest1981.sonix</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT OR Apache-2.0</project_license>
+  <name>Sonix Studio</name>
+  <summary>Native Linux digital audio workstation</summary>
+  <developer id="io.github.alexwest1981">
+    <name>Alex Weström</name>
+  </developer>
+  <description>
+    <p>
+      Sonix Studio is a digital audio workstation for Linux, written in Rust with an
+      egui interface. It edits audio directly on the timeline, the way FL Studio does,
+      with magnetic loop snapping — and keeps the engine's word: everything the
+      interface advertises is wired to real DSP, including the parts that are still
+      rough.
+    </p>
+    <p>Features include:</p>
+    <ul>
+      <li>Timeline arranger with direct clip editing, slicing and magnetic loop snapping</li>
+      <li>Real-time cpal/ALSA audio engine, with the system's PipeWire working through its ALSA layer</li>
+      <li>16-step channel rack, piano roll, and touch instruments</li>
+      <li>Analog Alchemy synthesizer, drum synthesis, per-voice filter and envelope</li>
+      <li>Multichannel effects mixer with per-track sends, automation lanes and VCA groups</li>
+      <li>Vocal Studio with microphone recording, a sampler and a pitch-preserving time-stretch</li>
+      <li>Stem separation (DSP path), a stem focus editor and Suno stem-pack import</li>
+      <li>Plugin host: catalogues everything, and loads CLAP, VST3 and VST2 effects with delay compensation</li>
+      <li>Optional AI music assistant speaking to any OpenAI-compatible endpoint</li>
+      <li>Export to WAV/MP3/FLAC with the master mix or per-track stems</li>
+    </ul>
+    <p>
+      Two things are deliberately opt-in rather than shipped: neural stem separation
+      (needs a build with the neural feature plus a user-supplied HTDemucs model — the
+      DSP separator is what runs without one) and LV2 plugin loading, which has no host
+      yet. The project says so itself in its README rather than in a footnote.
+    </p>
+  </description>
+  <launchable type="desktop-id">io.github.alexwest1981.sonix.desktop</launchable>
+  <url type="homepage">https://github.com/alexwest1981/sonix</url>
+  <url type="bugtracker">https://github.com/alexwest1981/sonix/issues</url>
+  <url type="vcs-browser">https://github.com/alexwest1981/sonix</url>
+  <url type="help">https://github.com/alexwest1981/sonix/blob/master/MANUAL.md</url>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://raw.githubusercontent.com/alexwest1981/sonix/v0.9.0/screenshots/01_tidslinje_arranger.png</image>
+      <caption>Timeline arranger: clips edited directly on the timeline, with the loop region snapped</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/alexwest1981/sonix/v0.9.0/screenshots/06_effects_mixer.png</image>
+      <caption>Multichannel effects mixer with per-track sends and automation</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/alexwest1981/sonix/v0.9.0/screenshots/03_piano_roll.png</image>
+      <caption>Piano roll for MIDI parts</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/alexwest1981/sonix/v0.9.0/screenshots/08_alchemy_synth.png</image>
+      <caption>Analog Alchemy, the built-in synthesizer</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/alexwest1981/sonix/v0.9.0/screenshots/11_stem_separator.png</image>
+      <caption>Stem separator with per-stem speed control</caption>
+    </screenshot>
+    <screenshot>
+      <image>https://raw.githubusercontent.com/alexwest1981/sonix/v0.9.0/screenshots/12_plugin_manager.png</image>
+      <caption>Plugin manager: catalogues CLAP, VST3 and VST2 plugins and loads them onto a track</caption>
+    </screenshot>
+  </screenshots>
+  <categories>
+    <category>AudioVideo</category>
+    <category>Audio</category>
+    <category>Music</category>
+  </categories>
+  <keywords>
+    <keyword>DAW</keyword>
+    <keyword>audio</keyword>
+    <keyword>music</keyword>
+    <keyword>mixer</keyword>
+    <keyword>recording</keyword>
+  </keywords>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="0.9.0" date="2026-09-11">
+      <url type="details">https://github.com/alexwest1981/sonix/releases/tag/v0.9.0</url>
+      <description>
+        <p>First public release.</p>
+        <ul>
+          <li>Real-time cpal/ALSA audio engine, oscillator and drum synthesis, filters with envelopes</li>
+          <li>Timeline arranger with slicing, magnetic snapping and clip editing</li>
+          <li>16-step channel rack, piano roll, Vocal Studio and microphone recording</li>
+          <li>Multichannel effects mixer, master FX chain, delay/reverb and Remix FX</li>
+          <li>Plugin catalogue for CLAP, VST3 and VST2, with hosting for CLAP/VST3/VST2 effects</li>
+          <li>Export to WAV, MP3 and FLAC — master mix or per-track stems</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
+</component>
