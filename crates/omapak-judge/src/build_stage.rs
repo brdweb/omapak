@@ -12,7 +12,9 @@ pub fn run(manifest: &Path, work_dir: &Path, repo_dir: &Path) -> Result<BuildRep
         std::env::var("OMAPAK_BUILD_TIMEOUT_SECS")
             .ok()
             .and_then(|v| v.parse().ok())
-            .unwrap_or(1800),
+            // Tahoma2D-class C++ builds (OpenToonz fork) need well over
+            // 30 minutes on a shared runner
+            .unwrap_or(5400),
     );
     let started = Instant::now();
 

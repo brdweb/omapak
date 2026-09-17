@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>io.github.wusel1007.clamav-gui</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0</project_license>
+  <name>ClamAV-GUI</name>
+  <summary>Qt front-end for the ClamAV antivirus engine</summary>
+  <description>
+    <p>
+      ClamAV-GUI wraps the ClamAV antivirus engine in a Qt interface:
+      on-demand and scheduled scans, signature updates through freshclam,
+      and clamd configuration, without touching the command line.
+    </p>
+    <p>
+      Scans can be launched from the window or by dropping files onto the
+      drop zone; results, quarantine handling and scan logs are presented
+      per profile. The UI ships German natively and carries community
+      translations that the author asks native speakers to review.
+    </p>
+  </description>
+  <developer id="io.github.wusel1007">
+    <name>wusel1007</name>
+  </developer>
+  <launchable type="desktop-id">io.github.wusel1007.clamav-gui.desktop</launchable>
+  <url type="homepage">https://github.com/wusel1007/clamav-gui</url>
+  <url type="bugtracker">https://github.com/wusel1007/clamav-gui/issues</url>
+  <!-- Author-published screenshots from his OpenDesktop page -->
+  <screenshots>
+    <screenshot type="default">
+      <image>https://cn.opendesktop.org/img/hive/content-pre1/170782-1.png</image>
+    </screenshot>
+    <screenshot>
+      <image>https://cn.opendesktop.org/img/hive/content-pre2/170782-2.png</image>
+    </screenshot>
+    <screenshot>
+      <image>https://cn.opendesktop.org/img/hive/content-pre3/170782-3.png</image>
+    </screenshot>
+  </screenshots>
+  <content_rating type="oars-1.1"/>
+  <releases>
+    <release version="1.4.6-1" date="2026-09-16"/>
+  </releases>
+</component>
