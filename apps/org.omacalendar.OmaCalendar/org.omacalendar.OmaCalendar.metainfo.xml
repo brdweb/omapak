@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.omacalendar.OmaCalendar</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>MIT</project_license>
+  <name>OmaCalendar</name>
+  <summary>A local-first calendar for Linux desktops</summary>
+  <description>
+    <p>
+      OmaCalendar is a keyboard-friendly, local-first calendar application for
+      Linux desktops. A local service owns synchronization and storage so cached
+      calendars remain available when network providers are offline.
+    </p>
+    <p>
+      OmaCalendar supports local calendars, Google Calendar, generic CalDAV,
+      and read-only iCalendar subscriptions.
+    </p>
+  </description>
+  <developer id="org.omacalendar">
+    <name>OmaCalendar contributors</name>
+  </developer>
+  <url type="homepage">https://github.com/brdweb/omacalendar</url>
+  <url type="bugtracker">https://github.com/brdweb/omacalendar/issues</url>
+  <url type="vcs-browser">https://github.com/brdweb/omacalendar</url>
+  <screenshots>
+    <screenshot type="default">
+      <image type="source">https://raw.githubusercontent.com/brdweb/omacalendar/main/docs/screenshots/desktop-month.png</image>
+    </screenshot>
+  </screenshots>
+  <launchable type="desktop-id">org.omacalendar.OmaCalendar.desktop</launchable>
+  <provides>
+    <binary>omacalendar</binary>
+    <binary>omacalendard</binary>
+    <binary>omacalendarctl</binary>
+    <mediatype>text/calendar</mediatype>
+  </provides>
+  <recommends>
+    <control>keyboard</control>
+    <control>pointing</control>
+  </recommends>
+  <content_rating type="oars-1.1" />
+  <releases>
+    <release version="1.1.1" date="2026-09-22" type="stable">
+      <description><p>A correctness fix for all-day events published with an inclusive end date: the Google and iCalendar read paths normalize the span to the exclusive next day, an iCalendar payload with a backwards all-day span no longer fails to parse as a whole, and already-cached events are repaired on read.</p></description>
+    </release>
+    <release version="1.1.0" date="2026-09-19" type="stable">
+      <description><p>Notification hardening for imported calendars: stale reminders and old invitation history are imported silently, durable invitation baselines survive daemon restarts, burst invitations collapse into a digest, and inline connection feedback plus keyboard and theming polish across the desktop UI.</p></description>
+    </release>
+    <release version="1.0.0" date="2026-09-09" type="stable">
+      <description><p>First stable Arch release with calendar sets, offline calendars, invitations, reminders and the optional Omarchy widget.</p></description>
+    </release>
+  </releases>
+</component>

@@ -1,0 +1,132 @@
+# OmaCalendar v1.1.1 is built from the public source revision below.  The
+# pinned archives and full Git commit make every network-fetched input
+# reproducible.
+app-id: org.omacalendar.OmaCalendar
+runtime: org.kde.Platform
+runtime-version: '6.11'
+sdk: org.kde.Sdk
+# Keep the GUI binary at /app/bin/omacalendar; the Flatpak entry point is the
+# source-owned launcher that owns the sandbox-local daemon lifecycle.
+command: omacalendar-launcher
+
+build-options:
+  # Both private libraries and the application install in /app/lib.  Keep the
+  # libical pkg-config file visible while CMake configures OmaCalendar.
+  libdir: /app/lib
+  prepend-pkg-config-path: /app/lib/pkgconfig
+
+finish-args:
+  # CalDAV, Google Calendar, and user-selected iCalendar subscriptions need
+  # network access; OmaCalendar has no telemetry.
+  - --share=network
+  # Qt, Wayland, and the desktop portals need the shared IPC namespace.
+  - --share=ipc
+  # Use the native Wayland display path.
+  - --socket=wayland
+  # Retain X11 only as the documented fallback for desktops without Wayland.
+  - --socket=fallback-x11
+  # Qt Quick uses the render node; this is GPU access only, never --device=all.
+  - --device=dri
+  # secret-tool stores provider refresh credentials through the user's session
+  # Secret Service; the Flatpak has no filesystem access to the keyring.
+  - --talk-name=org.freedesktop.secrets
+  # Reminder and invitation notifications are delivered through the session
+  # notification service, not through the system bus.
+  - --talk-name=org.freedesktop.Notifications
+  # Select the sandbox portal's theme integration instead of reading host KDE
+  # configuration directly.
+  - --env=QT_QPA_PLATFORMTHEME=xdgdesktopportal
+  # Explicitly deny KDE's host-global configuration; the app uses its isolated
+  # Flatpak configuration directory instead.
+  - --nofilesystem=xdg-config/kdeglobals
+
+# Remove development files after the application has configured against the
+# private libraries.  /lib/systemd is also removed: the Flatpak launcher, not
+# a native user service, owns the sandbox daemon.
+cleanup:
+  - /include
+  - /lib/cmake
+  - /lib/pkgconfig
+  - /lib/systemd
+  - /share/aclocal
+  - /share/gir-1.0
+  - /share/gtk-doc
+  - /share/man
+  - '*.a'
+  - '*.la'
+
+modules:
+  - name: libical
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DCMAKE_INSTALL_LIBDIR=lib
+      - -DBUILD_SHARED_LIBS=ON
+      - -DLIBICAL_BUILD_DOCS=OFF
+      - -DLIBICAL_BUILD_TESTING=OFF
+      - -DLIBICAL_GLIB=OFF
+      - -DLIBICAL_JAVA_BINDINGS=OFF
+      - -DLIBICAL_BUILD_EXAMPLES=OFF
+    post-install:
+      # libical is dual-licensed; keep both upstream license texts in the
+      # installed Flatpak even though its headers and build metadata are cleaned.
+      - install -Dm644 LICENSES/LGPL-2.1-only.txt /app/share/licenses/libical/LGPL-2.1-only.txt
+      - install -Dm644 LICENSES/MPL-2.0.txt /app/share/licenses/libical/MPL-2.0.txt
+    sources:
+      - type: archive
+        url: https://github.com/libical/libical/releases/download/v4.0.5/libical-4.0.5.tar.gz
+        sha256: cc09a3ac41d60e6144e644bd3fcf97d47106d659c4a0b8965102581401e67c9c
+
+  - name: libsecret
+    buildsystem: meson
+    config-opts:
+      - --libdir=lib
+      - -Dgtk_doc=false
+      - -Dintrospection=false
+      - -Dvapi=false
+      - -Dmanpage=false
+      - -Dbash_completion=disabled
+    post-install:
+      # Keep libsecret's LGPL notice while retaining its installed secret-tool
+      # helper, which the application invokes for Secret Service credentials.
+      - install -Dm644 ../COPYING /app/share/licenses/libsecret/COPYING
+    sources:
+      - type: archive
+        url: https://download.gnome.org/sources/libsecret/0.21/libsecret-0.21.7.tar.xz
+        sha256: 6b452e4750590a2b5617adc40026f28d2f4903de15f1250e1d1c40bfd68ed55e
+
+  - name: omacalendar
+    buildsystem: cmake-ninja
+    config-opts:
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DCMAKE_INSTALL_PREFIX=/app
+      - -DCMAKE_INSTALL_LIBDIR=lib
+      - -DOMACALENDAR_BUILD_TESTS=OFF
+      # Omapak deliberately supplies no protected deployment credentials.  The
+      # catalog build stays credential-free, and users import their own Google
+      # desktop OAuth credentials in Accounts & settings at runtime.
+      - -DOMACALENDAR_REQUIRE_GOOGLE_OAUTH_CONFIG=OFF
+    build-options:
+      env:
+        # Prevent an ambient build environment from embedding protected native
+        # release values in this public catalog build.
+        OMACALENDAR_BUILD_GOOGLE_CLIENT_ID: ''
+        OMACALENDAR_BUILD_GOOGLE_CLIENT_SECRET: ''
+    post-install:
+      # CMake installs the GUI, daemon, CLI, desktop file, icon, metainfo, and
+      # application license under /app.  Install the source-owned lifecycle
+      # launcher separately so Flatpak's command does not bypass it.
+      - install -Dm755 packaging/flatpak/omacalendar-launcher /app/bin/omacalendar-launcher
+      # The native widget requires the native daemon and cannot use the
+      # sandbox-local endpoint, so do not ship its control helper.
+      - rm -f /app/bin/omacalendar-widgetctl
+      # Change every desktop Exec=omacalendar command prefix (including the
+      # New Event action) without touching names such as omacalendarctl.
+      - >-
+        sed -E -i
+        's/^Exec=omacalendar([[:space:]]|$)/Exec=omacalendar-launcher\1/'
+        /app/share/applications/org.omacalendar.OmaCalendar.desktop
+    sources:
+      - type: git
+        url: https://github.com/brdweb/omacalendar.git
+        commit: aa8b2c4f4559de88ea2577f956fde85f4525fe2b
