@@ -1,0 +1,20 @@
+submitter: brdweb
+source_repo: https://github.com/brdweb/omacalendar
+summary: Local-first calendar for Linux desktops
+license: MIT
+homepage: https://github.com/brdweb/omacalendar
+tags: [office, calendar, productivity, qt, caldav, google, local-first]
+description: >-
+  OmaCalendar is a local-first, keyboard-friendly Qt calendar for local
+  calendars, Google Calendar, generic CalDAV, and read-only iCalendar
+  subscriptions. Its local service keeps cached calendars available when a
+  provider is offline; the catalog Flatpak stores its profile in its isolated
+  ~/.var/app/org.omacalendar.OmaCalendar/ directory and grants network,
+  display, DRI, Secret Service, Notifications, and portal-theme access without
+  host filesystem, system-bus, or unrestricted-device access. Google Calendar
+  requires the user to import their own desktop OAuth credentials because this
+  build deliberately omits protected deployment values; it includes no
+  telemetry. Native packages can provide an optional widget and a background
+  system service, while this Flatpak does neither: its foreground launcher owns
+  the sandbox daemon, so synchronization and reminders run only while a
+  launcher remains running.
