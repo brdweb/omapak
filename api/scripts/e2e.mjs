@@ -63,6 +63,11 @@ console.log(`e2e against ${BASE}\n`);
   check("limit respected", (await json("/v1/apps?limit=3")).body.apps.length <= 3);
   const q = encodeURIComponent("flatpak");
   check("q filter narrows or empties cleanly", typeof (await json(`/v1/apps?q=${q}`)).body.total === "number");
+  // Regression: a catalog entry without a summary once 500'd every search —
+  // the predicate must fail through per-record, and summary must stay a string.
+  const noMatch = await json(`/v1/apps?q=${encodeURIComponent("zzz-no-such-app")}`);
+  check("q with no matches → 200 (fail-through, not 500)", noMatch.res.status === 200 && noMatch.body?.total === 0, `status ${noMatch.res.status}`);
+  check("every summary is a string", all.body.apps.every((a) => typeof a.summary === "string"));
 }
 
 // 3. flathub source + search/category filters

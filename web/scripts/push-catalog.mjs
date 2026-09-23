@@ -102,6 +102,7 @@ for (const name of readdirSync(join(root, "apps"))) {
     name: friendly,
     icon: `https://repo.omapak.org/icons/${appId}.png`,
     developer: meta.developer || null,
+    summary: meta.summary,
     description: meta.description || null,
     submitter: meta.submitter,
     source_repo: meta.source_repo,

@@ -54,7 +54,9 @@ function omapakSummary(entry: CatalogEntry): AppSummary {
     app_id: entry.app_id,
     source: "omapak",
     name: entry.name || entry.app_id,
-    summary: entry.summary,
+    // The catalog schema dropped summary once (push-catalog.mjs) and every
+    // summary-less record 500'd /v1/apps?q=… — the contract here is a string.
+    summary: entry.summary ?? "",
     icon: entry.icon ?? null,
     developer: entry.developer ?? null,
     license: entry.license ?? null,
@@ -73,7 +75,7 @@ function flathubSummary(entry: FlathubEntry): AppSummary {
     app_id: entry.app_id,
     source: "flathub",
     name: entry.name || entry.app_id,
-    summary: entry.summary,
+    summary: entry.summary ?? "",
     icon: entry.icon ?? null,
     developer: null,
     license: entry.license ?? null,
@@ -149,9 +151,9 @@ v1.get("/apps", async (c) => {
   if (q) {
     filtered = filtered.filter(
       (a) =>
-        a.app_id.toLowerCase().includes(q) ||
-        a.name.toLowerCase().includes(q) ||
-        a.summary.toLowerCase().includes(q),
+        (a.app_id ?? "").toLowerCase().includes(q) ||
+        (a.name ?? "").toLowerCase().includes(q) ||
+        (a.summary ?? "").toLowerCase().includes(q),
     );
   }
 

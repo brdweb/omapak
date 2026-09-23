@@ -32,15 +32,17 @@
   });
   const heroDetail = useAppDetail(heroIdStore);
 
+  // One malformed record (e.g. a missing summary in the catalog) must cost
+  // that record its match, not the whole store page — hence ?? "" everywhere.
   const filtered = $derived.by(() => {
     const needle = q.trim().toLowerCase();
     return ($apps.data?.apps ?? []).filter(
       (a) =>
         (!category || a.category === category) &&
         (!needle ||
-          a.app_id.toLowerCase().includes(needle) ||
-          a.name.toLowerCase().includes(needle) ||
-          a.summary.toLowerCase().includes(needle)),
+          (a.app_id ?? "").toLowerCase().includes(needle) ||
+          (a.name ?? "").toLowerCase().includes(needle) ||
+          (a.summary ?? "").toLowerCase().includes(needle)),
     );
   });
   // Server-truth counts: the loaded array can be a truncated page window,
