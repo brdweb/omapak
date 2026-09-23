@@ -6,3 +6,4 @@ sources/
 build/
 *.gpg
 omapak-work/
+worker/target/
