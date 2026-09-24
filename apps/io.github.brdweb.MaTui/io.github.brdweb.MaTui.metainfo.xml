@@ -2,7 +2,7 @@
 <component type="desktop-application">
   <id>io.github.brdweb.MaTui</id>
   <name>MA-TUI</name>
-  <summary>Terminal controller and local speaker for Music Assistant</summary>
+  <summary>Terminal controller, local speaker and desktop media controls for Music Assistant</summary>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>MIT</project_license>
   <description>
@@ -13,6 +13,13 @@
       and played-episode tracking. It also registers the machine it runs on as a
       Sendspin speaker, so Music Assistant can send audio there directly, without
       a separate companion player process.
+    </p>
+    <p>
+      Media keys and compatible desktop bars can show and control the selected
+      player via MPRIS. Track notifications are optional and off by default.
+      Browse recently played music, sort and filter your library, manage
+      favourites and library items, start radio, and add music or the queue to
+      playlists.
     </p>
   </description>
   <launchable type="desktop-id">io.github.brdweb.MaTui.desktop</launchable>
@@ -34,6 +41,15 @@
   </categories>
   <content_rating type="oars-1.1" />
   <releases>
+    <release version="1.0.0" date="2026-09-23">
+      <description>
+        <ul>
+          <li>Add MPRIS desktop media controls and optional track notifications.</li>
+          <li>Manage favourites and library items; browse recently played music and sort or filter the library.</li>
+          <li>Start radio, add items to playlists and save the queue as a playlist.</li>
+        </ul>
+      </description>
+    </release>
     <release version="0.9.3" date="2026-09-17">
       <description>
         <p>

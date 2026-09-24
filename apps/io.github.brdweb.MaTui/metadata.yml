@@ -3,10 +3,13 @@ source_repo: https://github.com/brdweb/ma-tui
 summary: Terminal controller and local speaker for Music Assistant
 description: >-
   Builds ma-tui from source (Rust/Cargo, vendored via cargo-sources.json) at
-  tag v0.9.3. Two extra modules: alsa-lib (org.freedesktop.Platform ships the
-  runtime .so but not headers/pkg-config, which the alsa-sys build needs) and
-  libsecret built with -Dcrypto=disabled (secret-tool only, plain D-Bus
-  Secret Service negotiation, no gcrypt/gnutls module needed).
+  tag v1.0.0. Uses the 26.08 runtime and rust-stable SDK extension. Owns
+  org.mpris.MediaPlayer2.ma_tui for media keys and compatible desktop bars,
+  and talks to org.freedesktop.Notifications for optional track notifications
+  (off by default); neither permission grants general session-bus access.
+  Builds the pinned alsa-lib module for audio (the 26.08 SDK also supplies
+  ALSA headers and pkg-config) and libsecret with -Dcrypto=disabled for
+  secret-tool and plain D-Bus Secret Service negotiation.
 license: MIT
 homepage: https://github.com/brdweb/ma-tui
 tags: [terminal, music, audio, music-assistant]
